@@ -42,6 +42,7 @@ import Testing
     let rows = CityPlans.all
     #expect(rows.count == 44)
     #expect(Set(rows.map(\.id)).count == 44)
+    #expect(Set(rows.map(\.cover)).count == rows.count)
     #expect(rows.map(\.number) == Array(repeating: 4, count: 15)
       + Array(repeating: 5, count: 15) + Array(repeating: 6, count: 14))
     #expect(rows.filter { $0.number == 5 }.map(\.city) == cities)
