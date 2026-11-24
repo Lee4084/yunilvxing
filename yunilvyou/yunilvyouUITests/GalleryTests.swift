@@ -3,7 +3,7 @@ import XCTest
 @MainActor final class GalleryTests: XCTestCase {
   func testMyTravelCoverPhotos() {
     let app = XCUIApplication()
-    app.launch()
+    app.launchSignedInForUITest()
     app.tabBars.buttons["我的"].tap()
     let album = app.descendants(matching: .any)["hero.mine"].firstMatch
     XCTAssertTrue(album.waitForExistence(timeout: 8))
@@ -24,7 +24,7 @@ import XCTest
 
   func testCoverAlbumsAndMoreCities() {
     let app = XCUIApplication()
-    app.launch()
+    app.launchSignedInForUITest()
     for (tab, album, caption) in [("灵感故事", "home", "为自己，也为心里重要的人。"),
                                   ("我的", "mine", "草稿与收藏，仅保存在这台设备上。"),
                                   ("设计旅行", "design", "五个轻松的步骤，整理你真正期待的体验。"),
@@ -54,7 +54,7 @@ import XCTest
 
   func testCityPlanConsultation() {
     let app = XCUIApplication()
-    app.launch()
+    app.launchSignedInForUITest()
     app.tabBars.buttons["精选行程"].tap()
     app.buttons["city-01-4"].tap()
     let entry = app.buttons["查看图文行程"]
@@ -103,7 +103,7 @@ import XCTest
   }
   func testHomeShelvesSwipeAndOpenDetails() {
     let app = XCUIApplication()
-    app.launch()
+    app.launchSignedInForUITest()
     for (title, destination) in [("从一个故事开始", "故事详情"), ("精选行程", "行程详情")] {
       let shelf = app.scrollViews["home.shelf." + title]
       for _ in 0..<10 where !shelf.exists || shelf.frame.midY > app.frame.height * 0.78 {
@@ -132,7 +132,7 @@ import XCTest
   }
   func testStoryAndStructureRoutes() throws {
     let app = XCUIApplication()
-    app.launch()
+    app.launchSignedInForUITest()
     app.tabBars.buttons["精选行程"].tap()
     app.buttons["灵感示例"].tap()
     let category = app.buttons["海岸"]
@@ -160,7 +160,7 @@ import XCTest
   }
   func testFilteringAndFreeScroll() throws {
     let app = XCUIApplication()
-    app.launch()
+    app.launchSignedInForUITest()
     app.tabBars.buttons["精选行程"].tap()
     app.buttons["灵感示例"].tap()
     let track = app.scrollViews["gallery.track"]
@@ -195,7 +195,7 @@ import XCTest
     verifyCityPlan(in: XCUIApplication())
   }
   private func verifyCityPlan(in app: XCUIApplication) {
-    app.launch()
+    app.launchSignedInForUITest()
     app.tabBars.buttons["精选行程"].tap()
     let firstCard = app.buttons["city-01-4"]
     XCTAssertTrue(firstCard.waitForExistence(timeout: 20))

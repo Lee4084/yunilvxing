@@ -15,7 +15,7 @@ import XCTest
   }
 
   func testSpecialDayStoryAndPersonalPreferences() {
-    app.launch()
+    app.launchSignedInForUITest()
     app.buttons["探索旅行灵感"].tap()
     tap(app.buttons["theme.0"])
     tap(app.buttons["discovery.YN-S01"])
@@ -29,43 +29,17 @@ import XCTest
     XCTAssertEqual(app.buttons["希望如何联系你"].value as? String, "短信联系")
   }
 
-  func testDemoNumberSubmissionAndHistory() {
-    app.launch()
-    app.tabBars.buttons["我的"].tap()
-    tap(app.buttons["体验一次模拟咨询"])
-    submitDemo()
-    XCTAssertTrue(app.tabBars.buttons["灵感故事"].isSelected)
-    XCTAssertFalse(app.navigationBars["模拟咨询"].exists)
-    app.tabBars.buttons["我的"].tap()
-    XCTAssertTrue(app.navigationBars["我的"].waitForExistence(timeout: 6))
-    app.tabBars.buttons["灵感故事"].tap()
-    tap(app.buttons["查看本次提交结果"])
-    XCTAssertTrue(app.navigationBars["模拟提交结果"].waitForExistence(timeout: 6))
-    tap(app.buttons["查看本机演示记录"])
-    XCTAssertTrue(app.staticTexts["本机演示记录"].waitForExistence(timeout: 6))
-  }
-
-  private func submitDemo() {
-    XCTAssertTrue(app.staticTexts["DEMO-0001"].waitForExistence(timeout: 6))
-    tap(app.buttons["模拟验证号码"])
-    XCTAssertTrue(app.staticTexts["虚拟号码已模拟验证"].waitForExistence(timeout: 6))
-    tap(app.switches["我确认体验本机模拟提交"])
-    XCTAssertTrue(app.buttons["模拟提交我的旅行需求"].isEnabled)
-    tap(app.buttons["模拟提交我的旅行需求"])
-    XCTAssertTrue(app.staticTexts["模拟需求已接收"].waitForExistence(timeout: 8))
-  }
-
-  func testIOS15WishbookSubmissionReturnsHome() {
+  func testIOS15WishbookUsesLoginForSubmission() {
     app.launchArguments.append("-testIOS15Interaction")
     verifyCompletedWishbookSubmission()
   }
 
-  func testCompletedWishbookSubmissionReturnsHome() {
+  func testWishbookUsesLoginForSubmission() {
     verifyCompletedWishbookSubmission()
   }
 
   private func verifyCompletedWishbookSubmission() {
-    app.launch()
+    app.launchSignedInForUITest()
     app.tabBars.buttons["设计旅行"].tap()
     tap(app.buttons["新建一段旅行"])
     tap(app.buttons["为自己"])
@@ -91,21 +65,26 @@ import XCTest
     preview.lifetime = .keepAlways
     add(preview)
     XCTAssertFalse(app.staticTexts["参考内容"].exists)
-    tap(app.buttons["提交心愿书（本机演示）"])
-    XCTAssertTrue(app.staticTexts["模拟需求已接收"].waitForExistence(timeout: 8))
-    XCTAssertTrue(app.tabBars.buttons["灵感故事"].isSelected)
-    XCTAssertTrue(app.buttons["查看本次提交结果"].exists)
-    app.tabBars.buttons["设计旅行"].tap()
-    XCTAssertTrue(app.buttons["新建一段旅行"].waitForExistence(timeout: 6))
+    tap(app.buttons["提交行程愿望单"])
+    XCTAssertTrue(app.navigationBars["联系与提交确认"].waitForExistence(timeout: 8))
+    XCTAssertFalse(app.textFields["11 位手机号"].exists)
+    XCTAssertFalse(app.buttons["login.sendCode"].exists)
+    XCTAssertFalse(app.buttons["确认提交行程愿望单"].isEnabled)
+    #if targetEnvironment(simulator)
+    tap(app.switches["同意提交本次愿望单与联系方式"])
+    tap(app.buttons["确认提交行程愿望单"])
+    XCTAssertTrue(app.staticTexts["行程愿望单已接收"].waitForExistence(timeout: 6))
+    #endif
+
   }
 
   func testPrepareConsultationReportsMissingFieldsAndOpensChapter() {
-    app.launch()
+    app.launchSignedInForUITest()
     app.tabBars.buttons["设计旅行"].tap()
     app.buttons["新建一段旅行"].tap()
     tap(app.buttons["保存并返回"])
     tap(app.buttons["查看心愿书"].firstMatch)
-    tap(app.buttons["提交心愿书（本机演示）"])
+    tap(app.buttons["提交行程愿望单"])
     XCTAssertTrue(app.navigationBars["咨询前还需补充"].waitForExistence(timeout: 5))
     app.buttons["填写成人和儿童人数（没有儿童请选择 0 人）"].tap()
     XCTAssertTrue(app.buttons["成人人数"].waitForExistence(timeout: 5))
