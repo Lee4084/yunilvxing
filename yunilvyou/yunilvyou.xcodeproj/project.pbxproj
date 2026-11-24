@@ -6,6 +6,14 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A20000000000000000000000 /* ATAuthSDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10000000000000000000000 /* ATAuthSDK.xcframework */; };
+		A20000000000000000000001 /* YTXMonitor.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10000000000000000000001 /* YTXMonitor.xcframework */; };
+		A20000000000000000000002 /* YTXOperators.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* YTXOperators.xcframework */; };
+		A20000000000000000000003 /* Network.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10000000000000000000003 /* Network.framework */; };
+		B20000000000000000000001 /* yunilvyouTests/WishProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* yunilvyouTests/WishProtocol.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		04F6D85730AD9BEA00B88F5E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +35,11 @@
 		04F6D84930AD9BE000B88F5E /* yunilvyou.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = yunilvyou.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		04F6D85630AD9BEA00B88F5E /* yunilvyouTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = yunilvyouTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		04F6D86030AD9BEA00B88F5E /* yunilvyouUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = yunilvyouUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000000 /* ATAuthSDK.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = ATAuthSDK.xcframework; path = Vendor/ATAuthSDK.xcframework; sourceTree = SOURCE_ROOT; };
+		A10000000000000000000001 /* YTXMonitor.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = YTXMonitor.xcframework; path = Vendor/YTXMonitor.xcframework; sourceTree = SOURCE_ROOT; };
+		A10000000000000000000002 /* YTXOperators.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = YTXOperators.xcframework; path = Vendor/YTXOperators.xcframework; sourceTree = SOURCE_ROOT; };
+		A10000000000000000000003 /* Network.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Network.framework; path = System/Library/Frameworks/Network.framework; sourceTree = SDKROOT; };
+		B10000000000000000000001 /* yunilvyouTests/WishProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = yunilvyouTests/WishProtocol.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -52,6 +65,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A20000000000000000000000 /* ATAuthSDK.xcframework in Frameworks */,
+				A20000000000000000000001 /* YTXMonitor.xcframework in Frameworks */,
+				A20000000000000000000002 /* YTXOperators.xcframework in Frameworks */,
+				A20000000000000000000003 /* Network.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,13 +89,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		04DEFA0530B5172300FDD4FB /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000001 /* yunilvyouTests/WishProtocol.swift */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		04F6D84030AD9BE000B88F5E = {
 			isa = PBXGroup;
 			children = (
+				A10000000000000000000000 /* ATAuthSDK.xcframework */,
+				A10000000000000000000001 /* YTXMonitor.xcframework */,
+				A10000000000000000000002 /* YTXOperators.xcframework */,
+				A10000000000000000000003 /* Network.framework */,
 				04F6D84B30AD9BE000B88F5E /* yunilvyou */,
 				04F6D85930AD9BEA00B88F5E /* yunilvyouTests */,
 				04F6D86330AD9BEA00B88F5E /* yunilvyouUITests */,
 				04F6D84A30AD9BE000B88F5E /* Products */,
+				04DEFA0530B5172300FDD4FB /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -236,6 +266,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B20000000000000000000001 /* yunilvyouTests/WishProtocol.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -399,6 +430,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "予你旅行";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "用于连接予你旅行测试服务，验证本人手机号并提交行程愿望单。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -410,7 +442,11 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = local.youni.travel;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.yunilvxing.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -431,11 +467,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 8S59A5XCJ9;
+				DEVELOPMENT_TEAM = 8S59A5XCJ9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "予你旅行";
@@ -450,10 +484,12 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.huankecontact.test;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.yunilvxing.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = huankeProfileDev;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -480,6 +516,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = test01.yunilvyouTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) WISH_TESTS";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
@@ -501,6 +538,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = test01.yunilvyouTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) WISH_TESTS";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
