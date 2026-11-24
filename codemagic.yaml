@@ -16,24 +16,11 @@ workflows:
           set -euo pipefail
           set +x
           python3 - <<'PY'
-          import base64, ipaddress, os, plistlib
+          import base64, os, plistlib
           from pathlib import Path
-          from urllib.parse import urlsplit
           encoded = os.environ.get('TRAVEL_LOGIN_PLIST_BASE64', '')
-          api = os.environ.get('APP_API_BASE_URL', '').strip()
-          if not encoded or not api:
-              raise SystemExit('Configure TRAVEL_LOGIN_PLIST_BASE64 and APP_API_BASE_URL in youni_release.')
-          url = urlsplit(api)
-          if url.scheme != 'https' or not url.hostname or url.username or url.password or url.query or url.fragment:
-              raise SystemExit('APP_API_BASE_URL must be an HTTPS API base URL without credentials, query or fragment.')
-          try:
-              address = ipaddress.ip_address(url.hostname)
-          except ValueError:
-              if url.hostname == 'localhost' or url.hostname.endswith(('.local', '.localhost')):
-                  raise SystemExit('A public API endpoint is required for distribution.')
-          else:
-              if not address.is_global:
-                  raise SystemExit('A LAN or loopback API endpoint cannot be used for distribution.')
+          if not encoded:
+              raise SystemExit('Configure TRAVEL_LOGIN_PLIST_BASE64 in youni_release.')
           try:
               config = plistlib.loads(base64.b64decode(encoded, validate=True))
               values = config['com.yunilvxing.app']
@@ -41,11 +28,9 @@ workflows:
                   raise ValueError()
           except Exception:
               raise SystemExit('The private login configuration is invalid or does not match com.yunilvxing.app.')
-          values['APIBaseURL'] = api.rstrip('/') + '/'
           target = Path('yunilvyou/yunilvyou/TravelLogin.local.plist')
           target.write_bytes(plistlib.dumps(config))
           target.chmod(0o600)
-          print('Private login configuration prepared; values are hidden.')
           PY
       - name: Apply distribution signing profiles
         script: xcode-project use-profiles
@@ -73,25 +58,7 @@ workflows:
               assert info['CFBundleIdentifier'] == 'com.yunilvxing.app'
               assert info['MinimumOSVersion'] == '15.6'
               assert prefix + 'TravelLogin.local.plist' in names
-              print('IPA verified: com.yunilvxing.app; minimum iOS 15.6; login configuration included.')
           PY
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/xcarchive/*.xcarchive/dSYMs/*.dSYM
-      - /tmp/xcodebuild_logs/*.log
-
-  ios-build-check:
-    name: 予你旅行 · Release 编译检查（不可安装）
-    instance_type: mac_mini_m2
-    max_build_duration: 60
-    environment:
-      xcode: latest
-    scripts:
-      - name: Compile Release for iPhone without signing
-        script: |
-          set -euo pipefail
-          xcodebuild -project yunilvyou/yunilvyou.xcodeproj \
-            -scheme yunilvyou -configuration Release \
-            -destination 'generic/platform=iOS' \
-            -derivedDataPath /tmp/youni-release-check \
-            IPHONEOS_DEPLOYMENT_TARGET=15.6 CODE_SIGNING_ALLOWED=NO build

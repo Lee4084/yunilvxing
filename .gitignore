@@ -1,0 +1,9 @@
+/codex/
+/AGENTS.md
+.DS_Store
+*.log
+**/xcuserdata/
+**/*.xcuserstate
+**/DerivedData/
+**/build/
+**/TravelLogin.local.plist
