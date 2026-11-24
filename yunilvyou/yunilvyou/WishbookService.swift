@@ -1,9 +1,5 @@
 import CryptoKit
 import Foundation
-#if DEBUG
-import Security
-import OSLog
-#endif
 
 struct WishChallenge: Decodable {
   let challengeId: UUID
@@ -50,11 +46,11 @@ enum WishServiceError: LocalizedError {
     case let .rateLimited(seconds, requestID):
       let guidance: String
       if let seconds, seconds > 0 {
-        guidance = "测试服务已限流，请等按钮上的倒计时结束后再试。"
+        guidance = "服务已限流，请等按钮上的倒计时结束后再试。"
       } else if seconds == 0 {
-        guidance = "测试服务暂时限制了这项操作。请稍后手动重试。"
+        guidance = "服务暂时限制了这项操作。请稍后手动重试。"
       } else {
-        guidance = "测试服务已限流，未返回可用的重试时间。请先暂停发送。"
+        guidance = "服务已限流，未返回可用的重试时间。请先暂停发送。"
       }
       guard let requestID else { return guidance }
       return guidance + "\n请求编号 " + requestID.uuidString.lowercased()
@@ -64,13 +60,13 @@ enum WishServiceError: LocalizedError {
       case 401 where code?.hasPrefix("SMS_") == true: guidance = "验证码错误或已过期，请核对短信或重新获取。"
       case 401: guidance = "当前登录凭证已失效，请重新登录。"
       case 403: guidance = "当前账号暂时无法使用这项服务。"
-      case 404, 409: guidance = "测试服务或愿望单暂不可用。"
+      case 404, 409: guidance = "服务或愿望单暂不可用。"
       case 400, 422: guidance = "服务未接受本次信息，请核对后重试。"
-      case 502: guidance = "测试网关未取得有效的上游响应。"
-      case 503: guidance = "测试服务当前不可用。"
-      case 504: guidance = "测试网关等待上游响应超时。"
-      case 500...599: guidance = "测试服务处理请求时发生错误。"
-      default: guidance = "测试服务返回了未预期的状态。"
+      case 502: guidance = "网关未取得有效的上游响应。"
+      case 503: guidance = "服务当前不可用。"
+      case 504: guidance = "网关等待上游响应超时。"
+      case 500...599: guidance = "服务处理请求时发生错误。"
+      default: guidance = "服务返回了未预期的状态。"
       }
       var lines = [guidance, "HTTP \(status)"]
       if let code { lines.append("服务错误码 " + code) }
@@ -80,74 +76,16 @@ enum WishServiceError: LocalizedError {
   }
 }
 
-private final class WishSessionDelegate: NSObject, URLSessionTaskDelegate {
-  #if DEBUG
-  nonisolated func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge,
-    completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-    let space = challenge.protectionSpace
-    guard space.authenticationMethod == NSURLAuthenticationMethodServerTrust,
-      space.protocol == "https", space.host == "192.168.6.44", space.port == 19443,
-      let trust = space.serverTrust
-    else {
-      completionHandler(.performDefaultHandling, nil)
-      return
-    }
-    // This LAN gateway renews leaf certificates frequently. Anchor only its observed
-    // issuing certificate, keeping the TLS policies supplied by URLSession.
-    let issuerFingerprint = "f8d53db35b328a706f966d562e5e295f03e178a950320ec869dd3ce31bf8be0c"
-    let chain = SecTrustCopyCertificateChain(trust) as? [SecCertificate] ?? []
-    guard let issuer = chain.dropFirst().first(where: { certificate in
-      let digest = SHA256.hash(data: SecCertificateCopyData(certificate) as Data)
-      return digest.map { String(format: "%02x", $0) }.joined() == issuerFingerprint
-    }) else {
-      completionHandler(.performDefaultHandling, nil)
-      return
-    }
-    guard SecTrustSetAnchorCertificates(trust, [issuer] as CFArray) == errSecSuccess,
-      SecTrustSetAnchorCertificatesOnly(trust, true) == errSecSuccess,
-      SecTrustEvaluateWithError(trust, nil)
-    else {
-      completionHandler(.cancelAuthenticationChallenge, nil)
-      return
-    }
-    completionHandler(.useCredential, URLCredential(trust: trust))
-  }
-  #endif
-
-  nonisolated func urlSession(_ session: URLSession, task: URLSessionTask,
-    willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest,
-    completionHandler: @escaping (URLRequest?) -> Void) {
-    completionHandler(nil)
-  }
-}
-
 struct WishbookService {
-  static let baseURL: URL? = {
-    #if DEBUG
-    #if targetEnvironment(simulator)
-    if ProcessInfo.processInfo.arguments.contains("-travelOfflineUITests") {
-      return URL(string: "https://fixture.invalid/api/v1/")
-    }
-    #endif
-    return URL(string: "https://192.168.6.44:19443/api/v1/")
-    #else
-    guard let raw = TravelLoginConfiguration.values["APIBaseURL"],
-      let url = URL(string: raw), url.scheme == "https", url.host != nil,
-      url.user == nil, url.password == nil, url.query == nil, url.fragment == nil else { return nil }
-    return url
-    #endif
-  }()
+  static let baseURL: URL? = TravelLoginConfiguration.apiBaseURL
   static var available: Bool { baseURL != nil }
   private static let connection: URLSession = {
     let config = URLSessionConfiguration.ephemeral
-    #if DEBUG && targetEnvironment(simulator)
-    if baseURL?.host == "fixture.invalid" { config.protocolClasses = [WishProtocol.self] }
-    #endif
     config.httpShouldSetCookies = false
     config.urlCache = nil
     config.timeoutIntervalForRequest = 18
     config.timeoutIntervalForResource = 30
-    return URLSession(configuration: config, delegate: WishSessionDelegate(), delegateQueue: nil)
+    return URLSession(configuration: config)
   }()
   private let session: URLSession
   init(session: URLSession? = nil) { self.session = session ?? Self.connection }
@@ -235,7 +173,7 @@ struct WishbookService {
     request.httpBody = try JSONSerialization.data(withJSONObject: body)
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.setValue("application/json", forHTTPHeaderField: "Accept")
-    request.setValue("yunilvxing-ios", forHTTPHeaderField: "X-App-Key")
+    request.setValue(TravelLoginConfiguration.appKey, forHTTPHeaderField: "X-App-Key")
     if let token { request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization") }
     if let key { request.setValue(key, forHTTPHeaderField: "Idempotency-Key") }
     let (data, response) = try await session.data(for: request)
@@ -256,10 +194,6 @@ struct WishbookService {
         UUID(uuidString: value) != nil ||
           (value.utf8.count == 32 && value.utf8.allSatisfy { (48...57).contains($0) || (65...70).contains($0) || (97...102).contains($0) })
       }
-      #if DEBUG
-      Logger(subsystem: "local.youni.travel", category: "WishbookHTTP")
-        .error("POST \(path, privacy: .public) HTTP \(http.statusCode) code=\(code ?? "-", privacy: .public) request=\(reference ?? "-", privacy: .public)")
-      #endif
       if http.statusCode == 429 {
         let rawSeconds = detail?["retryAfterSeconds"] ?? error?["retryAfterSeconds"]
         let bodySeconds = rawSeconds.flatMap { raw -> Int? in

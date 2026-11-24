@@ -112,25 +112,7 @@ struct LibraryData: Codable {
 final class Library: ObservableObject {
   @Published private(set) var data = LibraryData()
   @Published var error: String?
-  @Published private(set) var demoHistory: [DemoConsultation] = []
-
-  func simulate(draft: Draft, outcome: DemoOutcome) -> UUID {
-    let record = DemoConsultation(draft: draft)
-    demoHistory.insert(record, at: 0)
-    Task { @MainActor in
-      try? await Task.sleep(nanoseconds: 1_200_000_000)
-      finishDemo(record.id, as: outcome)
-    }
-    return record.id
-  }
-
-  func finishDemo(_ id: UUID, as outcome: DemoOutcome) {
-    guard let index = demoHistory.firstIndex(where: { $0.id == id }) else { return }
-    demoHistory[index].outcome = outcome
-  }
-  func clearLocalData() {
-    if persist(LibraryData()) { demoHistory = [] }
-  }
+  func clearLocalData() { _ = persist(LibraryData()) }
 
   private var saved = LibraryData()
   private var pending: LibraryData?

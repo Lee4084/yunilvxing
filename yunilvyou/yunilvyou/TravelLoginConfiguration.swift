@@ -1,7 +1,9 @@
 import Foundation
 
 enum TravelLoginConfiguration {
-  // Each bundle has its own Aliyun scheme. Local provisioning is supplied at build time.
+  static let appKey = "yuni-ios-travel"
+  static let apiBaseURL = URL(string: "https://yunilvyou.80782.com/api/v1/")
+
   static let values: [String: String] = {
     guard let id = Bundle.main.bundleIdentifier,
       let url = Bundle.main.url(forResource: "TravelLogin.local", withExtension: "plist"),

@@ -108,7 +108,7 @@ struct JourneyDetail: View {
       }
       Panel("参考条件") {
         Text(item.limits)
-        Text("\(item.kind) · demo-1 · 费用待沟通").font(.travel(.footnote))
+        Text("\(item.kind) · 费用待沟通").font(.travel(.footnote))
       }
       MainButton(item.days == nil ? "用这个故事开始设计" : "加入旅行参考") {
         consult = false
@@ -215,70 +215,7 @@ struct RecordsPage: View {
       } else {
         EmptyMessage("暂无提交记录", systemImage: "tray", description: Text("本机保存的心愿书可在草稿中查看。"))
       }
-      if !library.demoHistory.isEmpty {
-        Panel("本机演示记录") {
-          ForEach(library.demoHistory) { row in
-            Button {
-              open(.demoResult(row.id))
-            } label: {
-              VStack(alignment: .leading, spacing: 6) {
-                Text(row.draft.name)
-                Text(
-                  "演示 · " + (row.outcome?.rawValue ?? "发送中") + " · "
-                    + row.created.formatted(date: .omitted, time: .standard)
-                )
-                .font(.travel(.footnote))
-              }
-            }
-          }
-        }
-      }
-      Button("查看提交状态设计演示") { open(.receipt) }
     }.navigationTitle("提交记录")
-  }
-}
-struct ReceiptExample: View {
-  @State var state = "待确认"
-  @State private var recovery = false
-  let descriptions = [
-    "发送中": "正在提交，请稍候…", "待确认": "暂未确认是否接收，请核验本次请求，不要重复提交。",
-    "已接收": "接收编号：DEMO-RECEIPT-001\n接收时间：2026年11月18日 15:30（北京时间）", "未接收": "本次需求未接收",
-    "本机记录保存失败": "需求已接收，但本机记录未保存成功，请恢复记录。",
-  ]
-  var body: some View {
-    TravelPage {
-      Panel("设计演示 · 提交状态") {
-        Picker("状态", selection: $state) {
-          ForEach(["发送中", "待确认", "已接收", "未接收", "本机记录保存失败"], id: \.self) { Text($0) }
-        }
-        Text(descriptions[state] ?? "")
-        if state == "待确认" || state == "本机记录保存失败" {
-          Button("查看原请求核验流程") { recovery = true }
-        }
-      }
-      Panel("给妈妈的一次看海旅行") {
-        Text("设计演示 · 只读快照")
-        Text("3 位成人 · 0 位儿童 · 3 天 · 日期待沟通")
-        Text("意向预算 CNY 9,000 · 全体预算")
-        Text("轻松看海 · 一家人的合影 · 不赶时间的家宴")
-      }
-    }.navigationTitle("提交结果及需求详情")
-      .sheet(isPresented: $recovery) {
-        TravelSheetNavigation {
-          TravelPage {
-            Panel("正在核验的原请求") {
-              Text("设计演示 · 给妈妈的一次看海旅行")
-              Text("原手机号　1•• •••• ••••")
-              Text("请验证提交时使用的手机号。这不会再次提交旅行需求。")
-            }
-            Panel("验证本人手机号") {
-              Text("咨询服务尚未配置。")
-              Button("获取验证码") {}.disabled(true)
-              Button("验证并核验原请求") {}.disabled(true)
-            }
-          }.navigationTitle("核验原请求").toolbar { Button("返回") { recovery = false } }
-        }
-      }
   }
 }
 struct HelpPage: View {
@@ -294,7 +231,7 @@ struct HelpPage: View {
       Panel("协议与政策") { AgreementLinks() }
       Panel("服务说明") {
         Text(WishbookService.available
-          ? "当前为测试环境。提交行程愿望单时，测试后台会保存已验证的手机号、愿望单和联系偏好。"
+          ? "提交行程愿望单时，我们会保存已验证的手机号、愿望单和联系偏好，用于处理本次咨询。"
           : "正式咨询服务尚未配置。")
       }
       Button("清空本机数据", role: .destructive) { confirm = true }

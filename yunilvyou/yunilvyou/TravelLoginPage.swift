@@ -1,7 +1,4 @@
 import SwiftUI
-#if DEBUG
-import OSLog
-#endif
 
 struct TravelLoginPage: View {
   @EnvironmentObject private var account: TravelAccount
@@ -149,9 +146,6 @@ struct TravelLoginPage: View {
   private func beginCarrierLogin() {
     guard (phase == .consent || phase == .sms), !busy else { return }
     guard agreed else { consentPrompt = true; return }
-    #if DEBUG
-    Logger(subsystem: "local.youni.travel", category: "LoginFlow").info("Consent tapped")
-    #endif
     phase = .carrier
     carrier.start { token, message in
       guard let token else { showSMS(message); return }
@@ -174,9 +168,6 @@ struct TravelLoginPage: View {
     carrier.cancel()
     phase = .sms
     status = message
-    #if DEBUG
-    Logger(subsystem: "local.youni.travel", category: "LoginFlow").info("SMS login selected")
-    #endif
   }
 
   private func send() {

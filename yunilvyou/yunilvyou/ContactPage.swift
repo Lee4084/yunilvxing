@@ -21,11 +21,7 @@ struct ContactPage: View {
         if let phone = account.session?.login.appUser.maskedPhone {
           Label("联系号码  " + phone, systemImage: "checkmark.circle")
         }
-        #if DEBUG
-        Text("这份心愿书、联系偏好和登录手机号将一并提交至予你旅行测试后台。")
-        #else
         Text("我们将按你选择的方式，通过登录手机号与你联系。")
-        #endif
         AgreementLinks(documents: [.privacy])
         Toggle("同意提交本次愿望单与联系方式", isOn: $agreed).disabled(sending)
       }

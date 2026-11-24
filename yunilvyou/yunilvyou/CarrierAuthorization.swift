@@ -1,9 +1,6 @@
 import Combine
 import UIKit
 import ATAuthSDK
-#if DEBUG
-import OSLog
-#endif
 
 @MainActor final class CarrierAuthorization: ObservableObject {
   private var attempt: UUID?
@@ -27,12 +24,7 @@ import OSLog
     }
     guard let info = TravelLoginConfiguration.values["SDKInfo"],
       !info.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-      #if DEBUG
-      Logger(subsystem: "local.youni.travel", category: "LoginFlow").error("Carrier login missing SDKInfo")
-      finish(nil, "此测试版本尚未配置本机号码认证，请使用短信验证码登录。")
-      #else
       finish(nil, "本机号码登录暂不可用，请使用短信验证码登录。")
-      #endif
       return
     }
     guard let type = PNSAuthType(rawValue: 2), let presenter,
@@ -58,11 +50,11 @@ import OSLog
     sdk.getReporter().setConsolePrintLoggerEnable(false)
     sdk.setAuthSDKInfo(info) { [weak self] result in
       guard let self, self.attempt == id else { return }
-      Self.record(stage: "initialize", code: result["resultCode"] as? String)
+
       guard result["resultCode"] as? String == "600000" else { complete(); return }
       self.sdk.checkEnvAvailable(with: type) { result in
         guard self.attempt == id else { return }
-        Self.record(stage: "environment", code: result?["resultCode"] as? String)
+
         guard let code = result?["resultCode"] as? String, ["600000", "600024"].contains(code),
           presenter.viewIfLoaded?.window != nil else { complete(); return }
         let model = Self.bottomSheet(bottomInset: presenter.view.safeAreaInsets.bottom)
@@ -74,7 +66,7 @@ import OSLog
         // getLoginToken also prefetches the masked number before presenting the consent UI.
         self.sdk.getLoginToken(withTimeout: 5, controller: presenter, model: model) { event in
           guard self.attempt == id else { return }
-          Self.record(stage: "authorization", code: event["resultCode"] as? String)
+
           switch event["resultCode"] as? String {
           case "600000":
             guard let token = event["token"] as? String, !token.isEmpty else { complete(); return }
@@ -94,17 +86,6 @@ import OSLog
         }
       }
     }
-  }
-
-  private static func record(stage: String, code: String?) {
-    #if DEBUG
-    let safe = code.flatMap { value -> String? in
-      guard value.utf8.count == 6, value.utf8.allSatisfy({ (48...57).contains($0) }) else { return nil }
-      return value
-    }
-    Logger(subsystem: "local.youni.travel", category: "LoginFlow")
-      .info("Carrier stage=\(stage, privacy: .public) code=\(safe ?? "-", privacy: .public)")
-    #endif
   }
 
   private static func bottomSheet(bottomInset: CGFloat) -> TXCustomModel {

@@ -26,7 +26,7 @@ struct TravelSession: Codable {
   private let key: [String: Any]
 
   init(service: WishbookService? = nil, persistSession: Bool = true) {
-    self.persistSession = persistSession && WishbookService.baseURL?.host != "fixture.invalid"
+    self.persistSession = persistSession
     self.service = service ?? WishbookService()
     key = [kSecClass as String: kSecClassGenericPassword,
       kSecAttrService as String: (Bundle.main.bundleIdentifier ?? "yunilvyou") + ".session",

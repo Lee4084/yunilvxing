@@ -19,11 +19,9 @@ enum Route: Hashable {
   case detail(Journey)
   case cityPlan(CityPlan)
   case chapter(UUID, Int, editing: Bool)
-  case demoConsult(UUID?)
-  case demoResult(UUID)
   case book(UUID)
   case contact(UUID)
-  case library, records, help, receipt
+  case library, records, help
 }
 struct ContentView: View {
   @State private var root: Root = .home
@@ -33,7 +31,7 @@ struct ContentView: View {
   @State private var homeSubmission: UUID?
   var body: some View {
     Group {
-      if #available(iOS 16, *), !TravelCompatibility.useLegacyNavigation {
+      if #available(iOS 16, *) {
         tabs
       } else {
         NavigationView {
@@ -92,7 +90,7 @@ struct RootStack: View {
   var body: some View {
     if routesOnly {
       legacyLink(after: [])
-    } else if #available(iOS 16, *), !TravelCompatibility.useLegacyNavigation {
+    } else if #available(iOS 16, *) {
       NavigationStack(path: $path) {
         rootPage.navigationTitle(tab == .home ? "予你旅行" : tab.rawValue)
           .navigationBarTitleDisplayMode(.inline)
@@ -166,13 +164,8 @@ struct RootStack: View {
     case .book(let id): if let draft = binding(id) { Wishbook(draft: draft, open: open) }
     case .contact(let id):
       if let draft = binding(id) { ContactPage(draft: draft.wrappedValue, submitted: submitted) }
-    case .demoConsult(let id):
-      DemoConsultationForm(
-        draft: library.data.drafts.first { $0.id == id } ?? DemoConsultation.example, submitted: submitted)
-    case .demoResult(let id): DemoResultPage(id: id, open: open)
     case .library: LocalShelf(open: open)
     case .records: RecordsPage(open: open)
-    case .receipt: ReceiptExample()
     case .help: HelpPage()
     }
   }
@@ -189,14 +182,6 @@ struct RootStack: View {
           Text(receipt.name)
           Text("回执编号 " + receipt.id.uuidString).font(.travel(.footnote))
           Button("查看提交记录") { open(.records) }
-          Button("收起提示") { homeSubmission = nil }
-        }
-      } else if let record = library.demoHistory.first(where: { $0.id == homeSubmission }) {
-        Panel(record.homeStatus) {
-          Text(record.draft.name)
-          Button(record.outcome == .unknown ? "查看并核验本次请求" : "查看本次提交结果") {
-            open(.demoResult(record.id))
-          }
           Button("收起提示") { homeSubmission = nil }
         }
       }

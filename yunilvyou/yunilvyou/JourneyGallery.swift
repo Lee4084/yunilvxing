@@ -307,7 +307,7 @@ private final class CardTrack: UIScrollView, UIScrollViewDelegate {
         }
       }
     let face: UIView
-    if #available(iOS 16, *), !TravelCompatibility.useLegacyNavigation {
+    if #available(iOS 16, *) {
       face = UIHostingConfiguration { content }.margins(.all, 0).makeContentView()
     } else {
       let controller = UIHostingController(rootView: content)

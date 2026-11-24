@@ -1,20 +1,9 @@
 import SwiftUI
 
-enum TravelCompatibility {
-  // Exercise the iOS 15 navigation and card paths on newer test devices as well.
-  static let useLegacyNavigation: Bool = {
-    #if DEBUG
-    return ProcessInfo.processInfo.arguments.contains("-testIOS15Interaction")
-    #else
-    return false
-    #endif
-  }()
-}
-
 struct TravelSheetNavigation<Content: View>: View {
   @ViewBuilder var content: Content
   var body: some View {
-    if #available(iOS 16, *), !TravelCompatibility.useLegacyNavigation {
+    if #available(iOS 16, *) {
       NavigationStack { content }
     } else {
       NavigationView { content }.navigationViewStyle(.stack)
