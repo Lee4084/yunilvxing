@@ -3,16 +3,13 @@ workflows:
     name: 予你旅行 · App Store IPA
     instance_type: mac_mini_m2
     max_build_duration: 60
-    integrations:
-      app_store_connect: yunilvxing
     environment:
       xcode: latest
       groups:
         - youni_release
       ios_signing:
-        provisioning_profiles: []
-        certificates:
-          - yunilvxing
+        distribution_type: app_store
+        bundle_identifier: com.yunilvxing.app
     scripts:
       - name: Inject private login configuration
         script: |
@@ -35,8 +32,6 @@ workflows:
           target.write_bytes(plistlib.dumps(config))
           target.chmod(0o600)
           PY
-      - name: Configure App Store provisioning profile
-        script: python3 yunilvyou/ci/configure_signing.py
       - name: Apply distribution signing profiles
         script: xcode-project use-profiles
       - name: Archive and export IPA
