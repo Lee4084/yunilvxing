@@ -3,9 +3,6 @@ import SwiftUI
 struct Wishbook: View {
   @Binding var draft: Draft
   var open: (Route) -> Void
-  let submitted: (UUID) -> Void
-  @EnvironmentObject private var library: Library
-  @State private var submitting = false
   @State private var checking = false
   @State private var correction: Int?
   @FocusState private var editingTitle: Bool
@@ -25,16 +22,14 @@ struct Wishbook: View {
       }
       ForEach(Catalog.chapters.indices, id: \.self) { index in
         Panel(Catalog.chapters[index]) {
-          Text(summary(index))
+          Text(draft.chapterSummary(index))
           Button("编辑" + Catalog.chapters[index]) { open(.chapter(draft.id, index, editing: true)) }
         }
       }
-      MainButton("提交心愿书（本机演示）") {
+      MainButton("提交行程愿望单") {
         guard draft.ready else { checking = true; return }
-        guard !submitting else { return }
-        submitting = true
-        submitted(library.simulate(draft: draft, outcome: .accepted))
-      }.disabled(submitting)
+        open(.contact(draft.id))
+      }
     }.navigationTitle("旅行心愿书")
       .sheet(
         isPresented: $checking,
@@ -86,7 +81,11 @@ struct Wishbook: View {
       return "检查出发日期和地点意向"
     }
   }
-  func summary(_ index: Int) -> String {
+}
+
+extension Draft {
+  func chapterSummary(_ index: Int) -> String {
+    let draft = self
     let lines: [String]
     switch index {
     case 0:
@@ -113,34 +112,6 @@ struct Wishbook: View {
     }
     let text = lines.filter { !$0.isEmpty }.joined(separator: "\n")
     return text.isEmpty ? "待沟通" : text
-  }
-}
-
-struct ContactPage: View {
-  var draft: Draft, open: (Route) -> Void
-  @State private var phone = ""
-  @EnvironmentObject var library: Library
-  var body: some View {
-    TravelPage {
-      Panel(draft.name) {
-        Text(draft.dateSummary)
-        Text("\(draft.wishes.count) 项愿望 · \(draft.budgetSummary)")
-      }
-      Panel("本人手机号") {
-        TextField("中国大陆 +86", text: $phone).keyboardType(.phonePad).textContentType(
-          .telephoneNumber)
-        Button("获取验证码") {}.disabled(true)
-        Text("咨询服务暂不可用，你可以先保存心愿书。").font(.travel(.footnote))
-      }
-      ContactPreferencePanel(preferences: library.contactBinding)
-      Panel("个人信息使用说明") {
-        Text("正式服务主体、隐私政策和受理渠道尚未配置。")
-        Toggle("同意本次咨询的数据用途", isOn: .constant(false)).disabled(true)
-        Button("查看帮助与隐私") { open(.help) }
-      }
-      MainButton("提交我的旅行需求") {}.disabled(true)
-      MainButton("使用虚拟号码体验模拟提交") { open(.demoConsult(draft.id)) }
-    }.navigationTitle("联系与提交确认")
   }
 }
 

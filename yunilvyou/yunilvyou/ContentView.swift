@@ -163,9 +163,9 @@ struct RootStack: View {
             selectedTab = .design
           })
       }
-    case .book(let id): if let draft = binding(id) { Wishbook(draft: draft, open: open, submitted: submitted) }
+    case .book(let id): if let draft = binding(id) { Wishbook(draft: draft, open: open) }
     case .contact(let id):
-      if let draft = binding(id) { ContactPage(draft: draft.wrappedValue, open: open) }
+      if let draft = binding(id) { ContactPage(draft: draft.wrappedValue, submitted: submitted) }
     case .demoConsult(let id):
       DemoConsultationForm(
         draft: library.data.drafts.first { $0.id == id } ?? DemoConsultation.example, submitted: submitted)
@@ -184,7 +184,14 @@ struct RootStack: View {
   }
   var home: some View {
     TravelPage {
-      if let record = library.demoHistory.first(where: { $0.id == homeSubmission }) {
+      if let receipt = library.data.receipts?.first(where: { $0.id == homeSubmission }) {
+        Panel("行程愿望单已接收") {
+          Text(receipt.name)
+          Text("回执编号 " + receipt.id.uuidString).font(.travel(.footnote))
+          Button("查看提交记录") { open(.records) }
+          Button("收起提示") { homeSubmission = nil }
+        }
+      } else if let record = library.demoHistory.first(where: { $0.id == homeSubmission }) {
         Panel(record.homeStatus) {
           Text(record.draft.name)
           Button(record.outcome == .unknown ? "查看并核验本次请求" : "查看本次提交结果") {
@@ -272,15 +279,18 @@ struct RootStack: View {
         }
       }
       ContactPreferencePanel(preferences: library.contactBinding)
-      MainButton("体验一次模拟咨询") { open(.demoConsult(nil)) }
+      if let draft = library.data.drafts.first {
+        MainButton("提交行程愿望单") { open(.book(draft.id)) }
+      }
       Panel("本机内容") {
         Button("我的草稿　\(library.data.drafts.count) 份") { open(.library) }
         Divider()
         Button("我的收藏　\(library.data.favorites.count) 项") { open(.library) }
         Divider()
-        Button("提交记录　0 条") { open(.records) }
+        Button("提交记录　\(library.data.receipts?.count ?? 0) 条") { open(.records) }
       }
       Button("帮助与隐私") { open(.help) }
+      AccountPanel()
     }
   }
 }

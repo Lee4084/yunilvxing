@@ -9,6 +9,8 @@ import SwiftUI
 
 @main
 struct yunilvyouApp: App {
+  @StateObject private var account = TravelAccount()
+
   init() {
     TravelTypography.configure()
     if #unavailable(iOS 16) { UIScrollView.appearance().keyboardDismissMode = .interactive }
@@ -16,7 +18,15 @@ struct yunilvyouApp: App {
 
   var body: some Scene {
     WindowGroup {
-      ContentView().font(.travel(.body))
+      Group {
+        if account.restoring {
+          RestoreLoginPage()
+        } else if account.session != nil {
+          ContentView()
+        } else {
+          TravelLoginPage()
+        }
+      }.environmentObject(account).font(.travel(.body)).tint(Ink.accent)
     }
   }
 }

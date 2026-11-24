@@ -204,7 +204,17 @@ struct RecordsPage: View {
   var open: (Route) -> Void
   var body: some View {
     TravelPage {
-      EmptyMessage("暂无提交记录", systemImage: "tray", description: Text("本机保存的心愿书可在草稿中查看。"))
+      if let receipts = library.data.receipts, !receipts.isEmpty {
+        ForEach(receipts) { receipt in
+          Panel(receipt.name) {
+            Text("行程愿望单已接收")
+            Text("回执编号 " + receipt.id.uuidString)
+            Text(receipt.submittedAt)
+          }
+        }
+      } else {
+        EmptyMessage("暂无提交记录", systemImage: "tray", description: Text("本机保存的心愿书可在草稿中查看。"))
+      }
       if !library.demoHistory.isEmpty {
         Panel("本机演示记录") {
           ForEach(library.demoHistory) { row in
@@ -279,12 +289,17 @@ struct HelpPage: View {
       Panel("帮助与隐私") {
         DisclosureGroup("草稿保存在哪里？") { Text("草稿仅保存在这台设备上，暂不支持跨设备同步。") }
         DisclosureGroup("提交后就是预订成功吗？") { Text("提交咨询不代表预订成功。") }
-        DisclosureGroup("如何申请删除已提交资料？") { Text("需要通过实际受理渠道提出请求。当前受理渠道尚未配置。") }
+        DisclosureGroup("如何申请删除已提交资料？") { Text("请发邮件至 94597956@qq.com，写明请求及回执编号（如有）。") }
       }
-      Panel("服务说明") { Text("服务主体、隐私政策与受理渠道尚未配置。咨询服务暂不可用。") }
+      Panel("协议与政策") { AgreementLinks() }
+      Panel("服务说明") {
+        Text(WishbookService.available
+          ? "当前为测试环境。提交行程愿望单时，测试后台会保存已验证的手机号、愿望单和联系偏好。"
+          : "正式咨询服务尚未配置。")
+      }
       Button("清空本机数据", role: .destructive) { confirm = true }
     }.navigationTitle("帮助与隐私")
-      .confirmationDialog("清空本机的草稿及收藏？", isPresented: $confirm, titleVisibility: .visible) {
+      .confirmationDialog("清空本机的草稿、收藏和提交记录？", isPresented: $confirm, titleVisibility: .visible) {
         Button("清空本机数据", role: .destructive) { library.clearLocalData() }
         Button("取消", role: .cancel) {}
       } message: {

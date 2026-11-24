@@ -103,6 +103,7 @@ struct ContactPreferences: Codable {
 }
 
 struct LibraryData: Codable {
+  var receipts: [WishReceipt]?
   var contactPreferences: ContactPreferences?
   var drafts: [Draft] = []
   var favorites: Set<String> = []
@@ -179,6 +180,11 @@ final class Library: ObservableObject {
     next.drafts.removeAll { $0.id == draft.id }
     next.drafts.insert(draft, at: 0)
     return persist(next, keepEditing: data.drafts.contains { $0.id == draft.id })
+  }
+  func record(_ receipt: WishReceipt) {
+    var next = data
+    next.receipts = [receipt] + (next.receipts ?? []).filter { $0.id != receipt.id }
+    persist(next, keepEditing: true)
   }
   var contactBinding: Binding<ContactPreferences> {
     Binding(
